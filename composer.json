@@ -1,5 +1,5 @@
 {
-	"name": "trejjam/configuration",
+	"name": "jan-made/configuration",
 	"description": "Nette base configuration object",
 	"keywords": [
 		"nette",
@@ -12,10 +12,13 @@
 		}
 	],
 	"support": {
-		"issues": "https://github.com/trejjam/configuration/issues"
+		"issues": "https://github.com/jan-made/configuration/issues"
+	},
+	"replace": {
+		"trejjam/configuration": "self.version"
 	},
 	"require": {
-		"php": "^8.1 | ^8.2",
+		"php": "^8.2 || ^8.3 || ^8.4 || ^8.5",
 
 		"nette/di": "^3.1",
 		"nette/php-generator": "^4.0"
