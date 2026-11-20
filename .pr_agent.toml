@@ -1,0 +1,42 @@
+# PR-Agent settings for this repository. PR-Agent reads this file from the
+# default branch (master).
+# Options: https://github.com/The-PR-Agent/pr-agent/blob/v0.50.0/pr_agent/settings/configuration.toml
+
+[github_app]
+# Review draft pull requests too, and run /describe and /review again after each push by a person.
+# The PR-Agent host skips pull requests and pushes from bot accounts.
+feedback_on_draft_pr = true
+handle_push_trigger = true
+
+[pr_reviewer]
+num_max_findings = 5
+extra_instructions = """\
+Repository rules. Check every rule in each area the diff touches. A changed line that breaks one is a finding, even when the code runs.
+
+Config schema (`src/DI/ConfigurationExtension.php`, `src/SiteMode.php`):
+- A new option has a default in `getConfigSchema()`, so existing configs compile unchanged.
+- Schema types match the constructor parameters they feed. A nullable option such as `migration.dir` is handled before it reaches a non-nullable parameter of `Migration`.
+- Each `SiteMode` case name equals its value: the schema checks names and converts with `SiteMode::from()`.
+
+Migrations (`src/Migration.php`, `src/Helper/Migration/`):
+- Group names, directories and dependencies in `Migration::getGroups()` stay stable. `test-data` and `dummy-data` are enabled only by `withTestData` and `withDummyData`, both false by default.
+- `DummyHandler` returns without running the migration file.
+
+Compatibility:
+- `nextras/migrations` stays optional: it is not in `require`, and code using it runs only when `useMigration` is true.
+- A removed or renamed config option, service name (`environment`, `fileVersion`, `systemDirectory`) or `SiteMode` case is marked as breaking in the PR description.
+- The repo has no tests or CI checks, so the PR description says how the change was verified.
+"""
+
+[pr_code_suggestions]
+# Publish only suggestions scored 5 or higher (0-10).
+suggestions_score_threshold = 5
+# Drop a suggestion whose score could not be computed; the default 7 would publish it.
+score_on_reflection_failure = 4
+extra_instructions = "Prefer existing project helpers and patterns over new abstractions."
+
+[ignore]
+# Generated code and lock files. Replaces the default list; keep vendor/** first.
+glob = [
+    "vendor/**",
+]
