@@ -1,0 +1,39 @@
+# PR-Agent settings for this repository. PR-Agent reads this file from the
+# default branch (master).
+# Options: https://github.com/The-PR-Agent/pr-agent/blob/v0.50.0/pr_agent/settings/configuration.toml
+
+[github_app]
+# Review draft pull requests too, and run /describe and /review again on every push.
+feedback_on_draft_pr = true
+handle_push_trigger = true
+
+[pr_reviewer]
+num_max_findings = 5
+extra_instructions = """\
+Also check these rules:
+
+Config schema (`src/DI/ConfigurationExtension.php`):
+- A new option has a schema entry with a default in `getConfigSchema()`, so existing configs compile unchanged. Service names `environment`, `fileVersion` and `systemDirectory` stay stable.
+- Schema types match the constructor parameters they feed. A nullable option such as `migration.dir` is handled before it reaches a non-nullable parameter of `Migration`.
+- `SiteMode` case names equal their values: the schema checks names and converts with `SiteMode::from()`. Renaming a case is a breaking change.
+
+Migrations (`src/Migration.php`, `src/Helper/Migration/`):
+- `nextras/migrations` stays optional and out of `require`. Code using it runs only when `useMigration` is true.
+- Group names, directories and dependencies in `Migration::getGroups()` stay stable. `test-data` and `dummy-data` are enabled only by `withTestData` and `withDummyData`, both false by default.
+- `DummyHandler` returns without running the migration file.
+
+Compatibility:
+- `composer.json` keeps `php` at `~8.4.0 || ~8.5.0`. A breaking change to options, `SiteMode` or public classes bumps `extra.branch-alias.dev-master`.
+- The repo has no tests or CI checks, so the PR description says how the change was verified.
+"""
+
+[pr_code_suggestions]
+# Publish only suggestions scored 5 or higher (0-10).
+suggestions_score_threshold = 5
+extra_instructions = "Prefer existing project helpers and patterns over new abstractions."
+
+[ignore]
+# Generated code and lock files. Replaces the default list; keep vendor/** first.
+glob = [
+    "vendor/**",
+]
